@@ -24,10 +24,17 @@ jobs:
           docker compose -f docker-compose.test.yml build
           docker compose -f docker-compose.test.yml up --exit-code-from test
 
-      # Upload coverage reports
+      # Generate coverage report
+      - name: Generate coverage report
+        run: |
+          # Assuming you're using pytest to run tests
+          docker-compose exec -T test pytest -v tests/ --timeout=30 --cov=./ --cov-report=term-missing --cov-report=xml:coverage.xml
+
+      # Upload Coverage Reports to Codecov
       - name: Upload Coverage Reports
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
+          token: ${{ secrets.CODECOV_TOKEN }} 
           file: ./coverage.xml
           flags: unittests
           fail_ci_if_error: true
