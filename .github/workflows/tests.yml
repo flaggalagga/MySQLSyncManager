@@ -11,17 +11,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step to check out the repository
+      # Checkout the repository
       - uses: actions/checkout@v3
 
-      # Step to use Docker Compose directly
-      - name: Run Docker Compose Tests
-        uses: docker/compose-action@v2
-        with:
-          compose-file: docker-compose.test.yml
-          run: up --exit-code-from test
+      # Set up Docker and Docker Compose
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      # Step to upload test coverage reports
+      # Build and run the Docker Compose tests
+      - name: Run Docker Compose Tests
+        run: |
+          docker-compose -f docker-compose.test.yml build
+          docker-compose -f docker-compose.test.yml up --exit-code-from test
+
+      # Upload coverage reports
       - name: Upload Coverage Reports
         uses: codecov/codecov-action@v3
         with:
