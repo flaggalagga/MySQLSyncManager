@@ -4,3 +4,4 @@ PyYAML>=6.0.2
 scp>=0.15.0
 pytest
 pytest-cov
+pytest-timeout
