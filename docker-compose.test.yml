@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app
+    mem_limit: 512m
+    memswap_limit: 512m
+    command: >
+      sh -c "
+      echo 'Running all tests except main...' &&
+      python -m pytest -v
+      tests/test_main.py
+      tests/test_backup.py
+      tests/test_config.py
+      tests/test_core.py
+      tests/test_db.py
+      tests/test_ssh.py
+      --cov=backup_operations
+      --cov=config
+      --cov=menu 
+      --cov=db
+      --cov=ssh
+      --cov=retry_utils
+      --cov=exceptions
+      --cov=utils
+      --cov-report=term-missing &&
+      echo 'Running main tests...' &&
+      python -m pytest -v tests/test_main.py --cov=main --cov-append --cov-report=term-missing"

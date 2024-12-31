@@ -1,0 +1,27 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+RUN apt-get update && \
+    apt-get install -y default-mysql-client && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt pytest pytest-mock pytest-cov pytest-timeout psutil
+
+# Explicitly upgrade and verify versions
+RUN pip install --upgrade cryptography paramiko && \
+    python -c "import cryptography; print('Cryptography version:', cryptography.__version__)" && \
+    python -c "import paramiko; print('Paramiko version:', paramiko.__version__)"
+
+# Copy everything to the container
+COPY . .
+
+# Set Python path to include current directory
+ENV PYTHONPATH="/app:${PYTHONPATH}"
+
+# Show debug info before running tests
+RUN echo "Directory structure:" && ls -R
+
+# Run tests with coverage
+CMD ["pytest", "-v", "tests/", "--timeout=30", "--cov=./", "--cov-report=term-missing", "--cov-report=xml"]
