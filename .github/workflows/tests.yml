@@ -28,7 +28,7 @@ jobs:
       - name: Generate coverage report
         run: |
           # Assuming you're using pytest to run tests
-          docker-compose exec -T test pytest -v tests/ --timeout=30 --cov=./ --cov-report=term-missing --cov-report=xml:coverage.xml
+          docker compose exec -T test pytest -v tests/ --timeout=30 --cov=./ --cov-report=term-missing --cov-report=xml:coverage.xml
 
       # Upload Coverage Reports to Codecov
       - name: Upload Coverage Reports
