@@ -29,6 +29,4 @@ services:
       --cov=exceptions \
       --cov=utils \
       --cov=main \
-      --cov-report=term-missing \
-      --cov-report=xml:coverage.xml \
-      --timeout=60"
+      --cov-report=term-missing"
