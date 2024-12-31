@@ -9,15 +9,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
+      # Step to check out the repository
       - uses: actions/checkout@v3
-      
-      - name: Run tests with coverage
-        run: |
-          docker-compose -f docker-compose.test.yml build
-          docker-compose -f docker-compose.test.yml up --exit-code-from test
-      
-      - name: Upload coverage reports
+
+      # Step to use Docker Compose directly
+      - name: Run Docker Compose Tests
+        uses: docker/compose-action@v2
+        with:
+          compose-file: docker-compose.test.yml
+          run: up --exit-code-from test
+
+      # Step to upload test coverage reports
+      - name: Upload Coverage Reports
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.xml
