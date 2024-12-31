@@ -14,35 +14,28 @@ jobs:
       # Checkout the repository
       - uses: actions/checkout@v3
 
-      # Set up Docker Buildx (includes Docker CLI with Compose v2 support)
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      # Set up Python and install dependencies
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'  # Specify the version of Python
 
-      # Build Docker images
-      - name: Build Docker images
+      # Install dependencies from requirements.txt
+      - name: Install dependencies
         run: |
-          docker compose -f docker-compose.test.yml build
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # Make sure you have pytest and pytest-cov here
 
-      # Run tests in Docker container
-      - name: Run Docker Compose Tests
+      # Run the tests with coverage
+      - name: Run tests with coverage
         run: |
-          docker compose -f docker-compose.test.yml up -d  # Run services in the background
-          
-      # Generate coverage report in the container
-      - name: Generate coverage report
-        run: |
-          docker compose exec -T test pytest -v tests/ --timeout=30 --cov=./ --cov-report=xml:coverage.xml
-
-      # Stop services (optional, as your tests might finish by this step)
-      - name: Stop Docker Compose services
-        run: |
-          docker compose down
+          pytest -v tests/ --timeout=30 --cov=./ --cov-report=xml:coverage.xml
 
       # Upload Coverage Reports to Codecov
-      - name: Upload Coverage Reports
+      - name: Upload Coverage Reports to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml  # Make sure the file exists
+          file: ./coverage.xml
           flags: unittests
           fail_ci_if_error: true
