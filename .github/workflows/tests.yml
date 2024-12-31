@@ -18,23 +18,31 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Build and run the Docker Compose tests
-      - name: Run Docker Compose Tests
+      # Build Docker images
+      - name: Build Docker images
         run: |
           docker compose -f docker-compose.test.yml build
-          docker compose -f docker-compose.test.yml up --exit-code-from test
 
-      # Generate coverage report
+      # Run tests in Docker container
+      - name: Run Docker Compose Tests
+        run: |
+          docker compose -f docker-compose.test.yml up -d  # Run services in the background
+          
+      # Generate coverage report in the container
       - name: Generate coverage report
         run: |
-          # Assuming you're using pytest to run tests
-          docker compose exec -T test pytest -v tests/ --timeout=30 --cov=./ --cov-report=term-missing --cov-report=xml:coverage.xml
+          docker compose exec -T test pytest -v tests/ --timeout=30 --cov=./ --cov-report=xml:coverage.xml
+
+      # Stop services (optional, as your tests might finish by this step)
+      - name: Stop Docker Compose services
+        run: |
+          docker compose down
 
       # Upload Coverage Reports to Codecov
       - name: Upload Coverage Reports
         uses: codecov/codecov-action@v5
         with:
-          token: ${{ secrets.CODECOV_TOKEN }} 
-          file: ./coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml  # Make sure the file exists
           flags: unittests
           fail_ci_if_error: true
