@@ -1,4 +1,3 @@
-# .github/workflows/github-test.yml
 name: GitHub Tests
 
 on:
@@ -28,6 +27,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-cov pytest-timeout pytest-mock
+          pip install -e .
 
       - name: Run tests
         run: |
@@ -38,15 +38,15 @@ jobs:
             tests/test_core.py \
             tests/test_db.py \
             tests/test_ssh.py \
-            --cov=backup_operations \
-            --cov=config \
-            --cov=menu \
-            --cov=db \
-            --cov=ssh \
-            --cov=retry_utils \
-            --cov=exceptions \
-            --cov=utils \
-            --cov=main \
+            --cov=mysql_sync_manager.backup_operations \
+            --cov=mysql_sync_manager.config \
+            --cov=mysql_sync_manager.menu \
+            --cov=mysql_sync_manager.db \
+            --cov=mysql_sync_manager.ssh \
+            --cov=mysql_sync_manager.retry_utils \
+            --cov=mysql_sync_manager.exceptions \
+            --cov=mysql_sync_manager.utils \
+            --cov=mysql_sync_manager.main \
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
             --timeout=60
