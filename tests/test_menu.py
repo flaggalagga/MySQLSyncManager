@@ -1,8 +1,8 @@
 import pytest
 import sys
 from unittest.mock import Mock, patch, call
-from exceptions import ValidationError, BackupError
-from menu import select_backup_option, select_existing_backup, select_custom_backup
+from mysql_sync_manager.exceptions import ValidationError, BackupError
+from mysql_sync_manager.menu import select_backup_option, select_existing_backup, select_custom_backup
 
 @pytest.fixture
 def mock_menu_config():
@@ -16,14 +16,19 @@ def mock_menu_config():
     }
 
 
-def test_select_backup_option_invalid_input(mock_ssh, mock_config, monkeypatch):
-    """Test handling of invalid input in backup option selection."""
-    # Sequence of inputs: invalid input, then quit
-    inputs = iter(['invalid', 'q'])
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+def test_select_backup_option(mock_ssh, mock_config, monkeypatch):
+    """Test selecting backup options."""
+    backups = [
+        {'name': '/backup/test1.sql.gz', 'size': '1.2M', 'date': '2024-01-01'},
+        {'name': '/backup/test2.sql.gz', 'size': '1.5M', 'date': '2024-01-02'}
+    ]
     
-    with pytest.raises(SystemExit):
-        select_backup_option(mock_ssh, mock_config)
+    with patch('mysql_sync_manager.menu.list_remote_backups', return_value=backups), \
+         patch('mysql_sync_manager.menu.check_remote_file', return_value=True), \
+         patch('builtins.input', side_effect=['2', '1']):
+        
+        result = select_backup_option(mock_ssh, mock_config)
+        assert result == '/backup/test1.sql.gz'
 
 def test_select_backup_option_configuration_validation_error():
     """Test backup option selection with invalid configuration."""

@@ -1,11 +1,30 @@
 # tests/test_config.py
 import pytest
 from unittest.mock import patch, mock_open
-from exceptions import ConfigurationError, ValidationError
+from mysql_sync_manager.exceptions import ConfigurationError, ValidationError
+
+def test_validate_config():
+    from mysql_sync_manager.config import validate_config, DB_CONFIG, SSH_CONFIG
+    
+    # Initialize with all required keys (even if empty)
+    DB_CONFIG.update({
+        'MYSQL_EXPORT_USER': '',
+        'MYSQL_EXPORT_PASSWORD': '',
+        'MYSQL_EXPORT_HOST': '',
+        'MYSQL_EXPORT_DATABASE': '',
+        'MYSQL_EXPORT_BACKUP_DIR': '',
+        'MYSQL_IMPORT_USER': '',
+        'MYSQL_IMPORT_PASSWORD': '',
+        'MYSQL_IMPORT_DATABASE': ''
+    })
+    
+    missing = validate_config()
+    assert 'MYSQL_EXPORT_PASSWORD' in missing
+
 
 def test_validate_config_success(mock_config):
     """Test successful configuration validation."""
-    from config import validate_config, DB_CONFIG, SSH_CONFIG
+    from mysql_sync_manager.config import validate_config, DB_CONFIG, SSH_CONFIG
     
     # Initialize DB_CONFIG with all required keys
     DB_CONFIG.clear()
@@ -33,7 +52,7 @@ def test_validate_config_success(mock_config):
 
 def test_validate_config_missing_values():
     """Test configuration validation with missing values."""
-    from config import validate_config, DB_CONFIG, SSH_CONFIG
+    from mysql_sync_manager.config import validate_config, DB_CONFIG, SSH_CONFIG
     
     # Initialize with empty values
     DB_CONFIG.clear()
@@ -63,7 +82,7 @@ def test_validate_config_missing_values():
 
 def test_merge_config_validation():
     """Test configuration merging with validation."""
-    from config import merge_config
+    from mysql_sync_manager.config import merge_config
     
     base = {'key1': 'value1', 'key2': None}
     updates = {'key2': 'value2', 'key3': 'value3'}
@@ -75,7 +94,7 @@ def test_merge_config_validation():
 
 def test_merge_config_empty_value():
     """Test merging config with empty value."""
-    from config import merge_config
+    from mysql_sync_manager.config import merge_config
     
     base = {'key1': 'value1'}
     updates = {'key1': ''}
@@ -86,7 +105,7 @@ def test_merge_config_empty_value():
 
 def test_select_configuration_success():
     """Test successful configuration selection."""
-    from config import select_configuration
+    from mysql_sync_manager.config import select_configuration
     
     yaml_content = """
     configurations:
@@ -114,7 +133,7 @@ def test_select_configuration_success():
 
 def test_select_configuration_quit():
     """Test configuration selection with quit option."""
-    from config import select_configuration
+    from mysql_sync_manager.config import select_configuration
     import sys
     
     yaml_content = """

@@ -17,6 +17,9 @@ RUN pip install --upgrade cryptography paramiko && \
 # Copy everything to the container
 COPY . .
 
+# Install the package in development mode
+RUN pip install -e .
+
 # Set Python path to include current directory
 ENV PYTHONPATH="/app:${PYTHONPATH}"
 

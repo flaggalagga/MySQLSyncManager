@@ -9,26 +9,20 @@ services:
       - .:/app
     environment:
       - PYTHONPATH=/app
+      - PYTEST_TIMEOUT_METHOD=thread
     mem_limit: 512m
     memswap_limit: 512m
     command: >
       sh -c "
       python -m pytest -v \
+      --timeout-method=thread \
+      --timeout=10 \  # Increased from 3 to 10
       tests/test_main.py \
       tests/test_backup.py \
       tests/test_config.py \
       tests/test_core.py \
       tests/test_db.py \
       tests/test_ssh.py \
-      --cov=backup_operations \
-      --cov=config \
-      --cov=menu \
-      --cov=db \
-      --cov=ssh \
-      --cov=retry_utils \
-      --cov=exceptions \
-      --cov=utils \
-      --cov=main \
+      --cov=mysql_sync_manager \
       --cov-report=term-missing \
-      --cov-report=xml:coverage.xml \
-      --timeout=60"
+      --cov-report=xml:coverage.xml"

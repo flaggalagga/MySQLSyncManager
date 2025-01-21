@@ -15,7 +15,27 @@ A comprehensive Python tool for managing MySQL database backups and synchronizat
 - Remote server backup creation
 - Local database restoration
 
-## Configuration Example
+## Build
+
+### Prerequisites
+- Docker
+- Docker Compose
+
+### Building the Application
+```bash
+# Build the executable
+docker-compose -f docker-compose.build.yml up --build
+```
+
+This will create an executable in the `dist` directory along with a configuration file.
+
+### Running Tests
+```bash
+# Run test suite
+docker-compose -f docker-compose.test.yml up --build
+```
+
+## Configuration
 
 Create a `db_configs.yml` file with your database configurations:
 
@@ -69,55 +89,35 @@ configurations:
 ## Prerequisites
 
 ### System Requirements
-- Python 3.10+
-- Linux/macOS environment
+- Docker installed
+- Linux environment (for running the executable)
+- SSH access to remote server
+- MySQL client installed on the system running the executable
 
-### Dependencies
-- paramiko
-- mysql-connector-python
-- PyYAML
-- scp
+### Docker Requirements
+- Docker version 20.10 or higher
+- Docker Compose version 2.0 or higher
 
-## Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/flaggalagga/MySQLSyncManager.git
-cd MySQLSyncManager
-```
-
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-## Usage
-
-1. Configure your `db_configs.yml`
-2. Run the application:
-```bash
-python3 -m main
-```
-3. Select your configuration profile
-4. Choose backup or restoration options
-
-## Development
-
-### Project Structure
+## Project Structure
 ```
 mysql_sync_manager/
 ├── main.py               # Application entry point
-├── config.py             # Configuration handling
-├── ssh.py                # SSH operations
-├── db.py                 # Database operations
-├── backup_operations.py  # Backup file handling
-└── menu.py               # User interaction menu
+├── config.py            # Configuration handling
+├── ssh.py               # SSH operations
+├── db.py                # Database operations
+├── backup_operations.py # Backup file handling
+└── menu.py              # User interaction menu
 ```
 
-### Testing
+## Development
+
+### Building for Development
 ```bash
-# Run tests with coverage
-docker-compose -f docker-compose.test.yml up
+# Build the application
+docker-compose -f docker-compose.build.yml up --build
+
+# Run tests
+docker-compose -f docker-compose.test.yml up --build
 ```
 
 ## Security Considerations
