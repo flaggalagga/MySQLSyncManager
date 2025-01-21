@@ -2,21 +2,25 @@
 import os
 import sys
 from typing import Optional, Dict
-from utils import RED, YELLOW, BLUE, NC, BOLD, ICONS
-from ssh import list_remote_backups, check_remote_file
-from backup_operations import create_new_backup
-from exceptions import ValidationError, BackupError
+from mysql_sync_manager.utils import RED, YELLOW, BLUE, NC, BOLD, ICONS
+from mysql_sync_manager.ssh import list_remote_backups, check_remote_file
+from mysql_sync_manager.backup_operations import create_new_backup
+from mysql_sync_manager.exceptions import ValidationError, BackupError
 
 def select_backup_option(ssh, db_config: Dict[str, str]) -> Optional[str]:
-    """
-    Handle backup file selection with error handling.
+    """Handle backup file selection.
     
+    Presents menu for backup selection:
+    - Create new backup
+    - Select existing backup
+    - Specify custom backup path
+
     Args:
         ssh: SSH client connection
         db_config: Database configuration dictionary
         
     Returns:
-        Selected backup path or None if operation cancelled
+        Optional[str]: Selected backup path or None if cancelled
         
     Raises:
         ValidationError: If user input is invalid
@@ -69,15 +73,16 @@ def select_backup_option(ssh, db_config: Dict[str, str]) -> Optional[str]:
             continue
 
 def select_existing_backup(ssh, backup_dir: str) -> Optional[str]:
-    """
-    Select an existing backup from the server.
+    """Select existing backup from server.
     
+    Lists and allows selection of existing backups.
+
     Args:
-        ssh: SSH client connection
-        backup_dir: Directory containing backups
+        ssh: SSH client connection 
+        backup_dir: Remote backup directory
         
     Returns:
-        Selected backup path or None
+        Optional[str]: Selected backup path or None if cancelled
         
     Raises:
         BackupError: If backup listing fails
@@ -130,14 +135,15 @@ def select_existing_backup(ssh, backup_dir: str) -> Optional[str]:
         raise BackupError("listing", str(e)) from e
 
 def select_custom_backup(ssh) -> Optional[str]:
-    """
-    Select a custom backup path.
+    """Select custom backup path.
     
+    Allows user to specify arbitrary backup path.
+
     Args:
         ssh: SSH client connection
         
     Returns:
-        Custom backup path or None if cancelled
+        Optional[str]: Specified backup path or None if cancelled
         
     Raises:
         ValidationError: If path is invalid

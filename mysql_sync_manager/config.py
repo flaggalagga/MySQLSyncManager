@@ -3,12 +3,23 @@ import os
 import sys
 from typing import Dict, List, Optional, Any
 import yaml
-from utils import GREEN, RED, YELLOW, BLUE, BOLD, NC, ICONS
-from exceptions import ConfigurationError, ValidationError
+from mysql_sync_manager.utils import GREEN, RED, YELLOW, BLUE, BOLD, NC, ICONS
+from mysql_sync_manager.exceptions import ConfigurationError, ValidationError
 
-# Base path for configuration
-BASE_PATH = os.getenv('APP_BASE_PATH', '/var/www/html')
-CONFIG_PATH = os.getenv('APP_CONFIG_PATH', os.path.join(BASE_PATH, 'db_configs.yml'))
+
+def get_executable_dir():
+    """Get the directory of the executable or script."""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        return os.path.dirname(sys.executable)
+    else:
+        # Running as script
+        return os.getcwd()
+
+# Add debug output
+executable_dir = get_executable_dir()
+CONFIG_PATH = os.path.join(executable_dir, 'db_configs.yml')
+print(f"Looking for config file at: {CONFIG_PATH}")
 
 # Database Configuration - initial defaults
 DB_CONFIG = {
@@ -37,50 +48,73 @@ SSH_CONFIG = {
 }
 
 def load_yml_config() -> Optional[Dict[str, Any]]:
-    """
-    Load configuration from YAML file.
+    """Load and parse YAML configuration file.
     
+    Reads database and SSH configuration from db_configs.yml.
+    Handles both configuration parsing and basic validation.
+
+    Returns:
+        Dict: Parsed configuration dictionary containing all settings
+
     Raises:
-        ConfigurationError: If YAML file is invalid or unreadable
+        ConfigurationError: If YAML file is missing or malformed
     """
-    if not os.path.exists(CONFIG_PATH):
-        raise ConfigurationError(
-            "yaml",
-            f"Configuration file not found: {CONFIG_PATH}"
-        )
-        
     try:
-        with open(CONFIG_PATH, 'r') as f:
-            config = yaml.safe_load(f)
+        if not os.path.exists(CONFIG_PATH):
+            raise ConfigurationError(
+                "yaml",
+                f"Configuration file not found: {CONFIG_PATH}"
+            )
+            
+        with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+            content = f.read()
+            # Strip any BOM and ensure proper line endings
+            content = content.replace('\r\n', '\n').strip()
+            try:
+                config = yaml.safe_load(content)
+            except yaml.YAMLError as e:
+                raise ConfigurationError(
+                    "yaml",
+                    f"Invalid YAML format: {str(e)}"
+                )
+                
+            if not config:
+                raise ConfigurationError(
+                    "yaml",
+                    "Empty configuration file"
+                )
+
             if not isinstance(config, dict):
                 raise ConfigurationError(
                     "yaml",
                     "Invalid YAML structure: root must be a dictionary"
                 )
+                
             if 'configurations' not in config:
                 raise ConfigurationError(
                     "yaml",
                     "Missing 'configurations' key in YAML"
                 )
+                
             return config
-    except yaml.YAMLError as e:
-        raise ConfigurationError(
-            "yaml",
-            f"YAML parsing error: {str(e)}"
-        ) from e
+                
+    except ConfigurationError:
+        raise
     except Exception as e:
         raise ConfigurationError(
             "yaml",
             f"Error reading config file: {str(e)}"
-        ) from e
+        )
 
 def validate_config() -> List[str]:
-    """
-    Validate required configuration values.
+    """Validate required configuration values.
     
+    Checks that all required database and SSH configuration values are present 
+    and non-empty.
+
     Returns:
-        List of missing required variables
-        
+        List[str]: List of missing required variable names
+
     Raises:
         ValidationError: If critical configurations are invalid
     """
@@ -118,18 +152,19 @@ def validate_config() -> List[str]:
     return missing_vars
 
 def merge_config(base: Dict[str, Any], updates: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Merge configuration dictionaries safely.
-    
+    """Merge two configuration dictionaries.
+
+    Updates base configuration with new values, validating the result.
+
     Args:
         base: Base configuration dictionary
-        updates: Updates to apply
-        
+        updates: Dictionary with values to update/override
+
     Returns:
-        Merged configuration dictionary
-        
+        Dict: Merged configuration dictionary
+
     Raises:
-        ValidationError: If critical values are invalid
+        ValidationError: If any merged values are empty or invalid
     """
     for key, value in updates.items():
         if value is not None:
@@ -142,20 +177,23 @@ def merge_config(base: Dict[str, Any], updates: Dict[str, Any]) -> Dict[str, Any
     return base
 
 def select_configuration() -> bool:
-    """
-    Allow user to select a configuration from YAML file.
+    """Interactive configuration selection.
+    
+    Presents available configurations to user and loads selected configuration.
     
     Returns:
-        bool: True if configuration was selected successfully
-        
-    Raises:
-        ConfigurationError: If configuration selection fails
+        bool: True if configuration was successfully selected and loaded
     """
     try:
         configs = load_yml_config()
         configurations = configs['configurations']
         
+        if not configurations:
+            print(f"{RED}No configurations found{NC}")
+            return False
+
         while True:
+            # ... rest of the code ...
             print(f"\n{ICONS['info']}{BOLD}  Available Configurations:{NC}")
             print(f"{'─'*50}")
             

@@ -4,23 +4,27 @@ import time
 import paramiko
 import socket
 from typing import List, Dict, Optional
-from utils import GREEN, RED, BLUE, YELLOW, DIM, NC, CLEAR_LINE, ICONS, BOLD
-from exceptions import SSHConnectionError, ValidationError, BackupError
-from retry_utils import with_retry, RetryContext
+from mysql_sync_manager.utils import GREEN, RED, BLUE, YELLOW, DIM, NC, CLEAR_LINE, ICONS, BOLD
+from mysql_sync_manager.exceptions import SSHConnectionError, ValidationError, BackupError
+from mysql_sync_manager.retry_utils import with_retry, RetryContext
 
 def list_remote_backups(ssh: paramiko.SSHClient, backup_dir: str) -> List[Dict[str, str]]:
-    """
-    List backup files in the remote directory.
+    """List backup files in remote directory.
     
+    Lists .sql.gz and .tar.gz files with metadata.
+
     Args:
         ssh: SSH client connection
-        backup_dir: Directory containing backups
+        backup_dir: Directory to search
         
     Returns:
-        List of dictionaries containing backup file information
-    
+        List[Dict[str, str]]: List of backup info dictionaries containing:
+            - name: Backup filename
+            - size: File size
+            - date: Modification date
+            
     Raises:
-        BackupError: If listing backups fails
+        BackupError: If listing fails
     """
     try:
         # Look for both .sql.gz and .tar.gz files using the configured backup_dir
@@ -53,18 +57,19 @@ def list_remote_backups(ssh: paramiko.SSHClient, backup_dir: str) -> List[Dict[s
         return []
 
 def connect_ssh(config: Dict[str, str], db_config: Dict[str, str]) -> Optional[paramiko.SSHClient]:
-    """
-    Establish SSH connection with encrypted key support.
+    """Establish SSH connection with encrypted key support.
     
+    Creates SSH connection using password or key authentication.
+
     Args:
         config: SSH configuration dictionary
         db_config: Database configuration dictionary
         
     Returns:
-        SSHClient if successful, None otherwise
+        Optional[SSHClient]: Connected client or None on failure
         
     Raises:
-        SSHConnectionError: If SSH connection fails
+        SSHConnectionError: If connection fails
     """
     ssh = paramiko.SSHClient()
     ssh.load_system_host_keys()
@@ -154,15 +159,14 @@ def connect_ssh(config: Dict[str, str], db_config: Dict[str, str]) -> Optional[p
         raise SSHConnectionError(config['HOST'], str(e))
 
 def check_remote_file(ssh: paramiko.SSHClient, remote_path: str) -> bool:
-    """
-    Check if a file exists on the remote server.
-    
+    """Check if file exists on remote server.
+
     Args:
         ssh: SSH client connection
         remote_path: Path to check
         
     Returns:
-        True if file exists, False otherwise
+        bool: True if file exists
     """
     try:
         stdin, stdout, stderr = ssh.exec_command(f"test -f {remote_path} && echo 'exists' || echo 'not found'")
@@ -174,16 +178,17 @@ def check_remote_file(ssh: paramiko.SSHClient, remote_path: str) -> bool:
 
 @with_retry(retries=2, delay=1.0)
 def execute_remote_command(ssh: paramiko.SSHClient, command: str, timeout: int = 300) -> bool:
-    """
-    Execute a command on the remote server with timeout and error handling.
+    """Execute command on remote server.
     
+    Executes command with timeout and error handling.
+
     Args:
         ssh: SSH client connection
         command: Command to execute
         timeout: Command timeout in seconds
         
     Returns:
-        True if command succeeded, False otherwise
+        bool: True if command succeeded
     """
     start_time = time.time()
     
@@ -218,7 +223,17 @@ def execute_remote_command(ssh: paramiko.SSHClient, command: str, timeout: int =
         return False
 
 def get_server_info(ssh: paramiko.SSHClient, db_config: Dict[str, str]) -> bool:
-    """Get server and database information."""
+    """Get server and database information.
+    
+    Retrieves MySQL server version, settings, and metrics.
+
+    Args:
+        ssh: SSH client connection
+        db_config: Database configuration dictionary
+        
+    Returns:
+        bool: True if info retrieved successfully
+    """
     try:
         # Implementation as before...
         return True

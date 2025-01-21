@@ -1,0 +1,56 @@
+# Test configuration file - do not use for production
+configurations:
+  test:
+    name: "Test Environment"
+    config:
+      MYSQL_EXPORT_HOST: "test-host"
+      MYSQL_EXPORT_PORT: "3306"
+      MYSQL_EXPORT_DATABASE: "test_db"
+      MYSQL_EXPORT_USER: "test_user"
+      MYSQL_EXPORT_PASSWORD: "test_pass"
+      MYSQL_EXPORT_BACKUP_DIR: "/backup"
+      MYSQL_IMPORT_HOST: "localhost"
+      MYSQL_IMPORT_PORT: "3306"
+      MYSQL_IMPORT_DATABASE: "test_db"
+      MYSQL_IMPORT_USER: "test_user"
+      MYSQL_IMPORT_PASSWORD: "test_pass"
+      SSH_HOST: "test-host"
+      SSH_USER: "test_user"
+      SSH_PASSWORD: "test_pass"
+      SSH_KEY_PATH: "/path/to/key"
+      
+  production:
+    name: "Production Database"
+    config:
+      MYSQL_EXPORT_HOST: "164.132.77.154"
+      MYSQL_EXPORT_PORT: "3307"
+      MYSQL_EXPORT_DATABASE: "snosm"
+      MYSQL_EXPORT_USER: "snosm"
+      MYSQL_EXPORT_PASSWORD: "9%9ijptM0)]nAai"
+      MYSQL_EXPORT_BACKUP_DIR: "/var/www/html/snosm/backup"
+      MYSQL_IMPORT_HOST: "localhost"
+      MYSQL_IMPORT_PORT: "3306"
+      MYSQL_IMPORT_DATABASE: "snosm"
+      MYSQL_IMPORT_USER: "snosm"
+      MYSQL_IMPORT_PASSWORD: "9%9ijptM0)]nAai"
+      SSH_HOST: "164.132.77.154"
+      SSH_USER: "snosm"
+      SSH_KEY_PATH: "/var/www/html/.ssh/snosm_backup_key"
+
+  prestashop:
+    name: "Kiki Fornell Prestashop Database"
+    config:
+      MYSQL_EXPORT_HOST: "helwigdevqps.mysql.db"
+      MYSQL_EXPORT_PORT: "3306"
+      MYSQL_EXPORT_DATABASE: "helwigdevqps"
+      MYSQL_EXPORT_USER: "helwigdevqps"
+      MYSQL_EXPORT_PASSWORD: "ZCUc2vMdi8qA10e"
+      MYSQL_EXPORT_BACKUP_DIR: "www"
+      MYSQL_IMPORT_HOST: "shop-kikifornell_mysql"
+      MYSQL_IMPORT_PORT: "3306"
+      MYSQL_IMPORT_DATABASE: "prestashop"
+      MYSQL_IMPORT_USER: "prestashop"
+      MYSQL_IMPORT_PASSWORD: "prestashop"
+      SSH_HOST: "ssh.cluster027.hosting.ovh.net"
+      SSH_USER: "helwigdevq"
+      SSH_KEY_PATH: "/var/www/html/.ssh/id_ed25519_flaggalagga"

@@ -2,8 +2,8 @@
 from typing import TypeVar, Callable, Optional, List, Any
 from functools import wraps
 import time
-from exceptions import DatabaseManagerError
-from utils import RED, YELLOW, BLUE, NC, ICONS, SpinnerProgress
+from mysql_sync_manager.exceptions import DatabaseManagerError
+from mysql_sync_manager.utils import RED, YELLOW, BLUE, NC, ICONS, SpinnerProgress
 
 T = TypeVar('T')
 
@@ -13,7 +13,19 @@ def with_retry(
     backoff: float = 2.0,
     exceptions: tuple = (Exception,)
 ) -> Callable:
-    """Decorator for retrying operations with exponential backoff."""
+    """Decorator for retrying operations.
+    
+    Retries failed operations with exponential backoff.
+
+    Args:
+        retries: Number of retry attempts
+        delay: Initial delay between retries
+        backoff: Multiplicative factor for delay
+        exceptions: Exception types to catch
+        
+    Returns:
+        Callable: Decorated function
+    """
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> T:
@@ -47,7 +59,17 @@ def with_retry(
 
 
 class RetryContext:
-    """Context manager for retry operations with progress tracking."""
+    """Context manager for retry operations.
+    
+    Manages retries with progress tracking.
+
+    Args:
+        operation: Operation description
+        retries: Number of retry attempts
+        delay: Initial delay between retries
+        backoff: Multiplicative factor for delay
+        exceptions: Exception types to catch
+    """
     
     def __init__(
         self,
@@ -95,7 +117,16 @@ class RetryContext:
 
 
 def collect_errors(operations: List[Callable[[], Any]]) -> List[Exception]:
-    """Execute multiple operations and collect errors."""
+    """Execute multiple operations and collect errors.
+    
+    Runs operations sequentially, collecting any errors.
+
+    Args:
+        operations: List of callables to execute
+        
+    Returns:
+        List[Exception]: List of caught exceptions
+    """
     errors: List[Exception] = []
     
     for operation in operations:

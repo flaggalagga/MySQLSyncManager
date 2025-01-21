@@ -4,26 +4,29 @@ import os
 import subprocess
 from typing import Optional, Dict, Tuple
 from paramiko import SSHClient
-from utils import GREEN, RED, YELLOW, BLUE, BOLD, NC, ICONS, SpinnerProgress
-from exceptions import (
+from mysql_sync_manager.utils import GREEN, RED, YELLOW, BLUE, BOLD, NC, ICONS, SpinnerProgress
+from mysql_sync_manager.exceptions import (
     DatabaseConnectionError,
     ValidationError,
     RestoreError
 )
-from retry_utils import with_retry, RetryContext
+from mysql_sync_manager.retry_utils import with_retry, RetryContext
 
 @with_retry(retries=2, delay=1.0)
 def get_mysql_info(db_config: Dict[str, str], server_type: str = 'import', ssh: Optional[SSHClient] = None) -> Tuple[Optional[str], bool]:
-    """
-    Get detailed MySQL server information and check privileges.
+    """Get MySQL server information and check privileges.
     
+    Gets server version and checks user privileges.
+
     Args:
         db_config: Database configuration dictionary
         server_type: Either 'import' or 'export'
-        ssh: SSH client connection for export server queries
+        ssh: SSH client for export server queries
         
     Returns:
-        Tuple of (MySQL major version as string or None, has_privileges boolean)
+        Tuple of:
+            - Optional[str]: MySQL major version or None
+            - bool: Whether user has required privileges
     """
     try:
         # Determine which credentials to use
@@ -187,7 +190,21 @@ def get_mysql_info(db_config: Dict[str, str], server_type: str = 'import', ssh: 
 
 @with_retry(retries=2, delay=1.0)
 def restore_database(sql_file: str, db_config: Dict[str, str]) -> bool:
-    """Restore database using MySQL directly."""
+    """Restore database from SQL file.
+    
+    Restores backup using mysql client.
+
+    Args:
+        sql_file: Path to SQL file
+        db_config: Database configuration dictionary
+        
+    Returns:
+        bool: True if restore succeeded
+        
+    Raises:
+        ValidationError: If inputs invalid
+        RestoreError: If restore fails
+    """
     import_progress = SpinnerProgress("Importing database")
     
     try:

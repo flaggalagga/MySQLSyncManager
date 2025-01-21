@@ -34,7 +34,13 @@ ICONS = {
 }
 
 class SpinnerProgress:
-    """Docker-style spinner progress indicator"""
+    """Progress indicator with spinner animation.
+    
+    Shows animated progress indicator with message.
+
+    Args:
+        message: Progress message to display
+    """
     def __init__(self, message):
         self.message = message
         self.spinner = ICONS['spinner']
@@ -71,7 +77,10 @@ class SpinnerProgress:
             print(f"\r{RED}{ICONS['times']}{NC} {self.message} ({time_str})", end='\n\n', flush=True)  # Added double newline
 
 def print_header():
-    """Print the application header"""
+    """Print application header.
+    
+    Prints title and timestamp.
+    """
     terminal_width = shutil.get_terminal_size().columns
     print(f"{CYAN}{'='*terminal_width}{NC}")
     print(f"{BOLD}Database Local Manager{NC}".center(terminal_width))

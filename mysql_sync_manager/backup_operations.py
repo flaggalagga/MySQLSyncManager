@@ -4,14 +4,27 @@ import time
 from scp import SCPClient
 from paramiko import SSHClient, SSHException
 from typing import Optional, Dict, List, Tuple
-from utils import SpinnerProgress, GREEN, RED, YELLOW, BLUE, BOLD, NC, ICONS
-from exceptions import BackupError
-from retry_utils import RetryContext
-from ssh import execute_remote_command
-from db import get_mysql_info
+from mysql_sync_manager.utils import SpinnerProgress, GREEN, RED, YELLOW, BLUE, BOLD, NC, ICONS
+from mysql_sync_manager.exceptions import BackupError
+from mysql_sync_manager.retry_utils import RetryContext
+from mysql_sync_manager.ssh import execute_remote_command
+from mysql_sync_manager.db import get_mysql_info
 
 def get_database_objects(ssh: SSHClient, db_config: Dict[str, str]) -> List[str]:
-    """Get tables from the database through SSH."""
+    """Get list of database objects from remote server.
+    
+    Retrieves list of tables and views through SSH connection.
+
+    Args:
+        ssh: SSH client connection
+        db_config: Database configuration dictionary
+        
+    Returns:
+        List[str]: List of database object names
+
+    Raises:
+        SSHException: If remote command execution fails
+    """
     escaped_password = db_config['MYSQL_EXPORT_PASSWORD'].replace("'", "'\\''")
     
     objects_cmd = (
@@ -45,7 +58,19 @@ def get_database_objects(ssh: SSHClient, db_config: Dict[str, str]) -> List[str]
     return tables
 
 def select_backup_options(ssh: SSHClient, db_config: Dict[str, str]) -> Tuple[List[str], bool]:
-    """Select what to include/exclude from backup."""
+    """Select backup inclusion/exclusion options.
+    
+    Interactive menu for selecting backup components.
+
+    Args:
+        ssh: SSH client connection
+        db_config: Database configuration dictionary
+        
+    Returns:
+        Tuple containing:
+            - List[str]: Excluded table names 
+            - bool: Whether to skip routines
+    """
     print(f"\n{ICONS['data_chart']}  {BOLD}Backup Options:{NC}")
     print(f"{'─'*50}")
     print(f"{BLUE}1.{NC} Export everything (tables + routines)")
@@ -99,7 +124,20 @@ def select_backup_options(ssh: SSHClient, db_config: Dict[str, str]) -> Tuple[Li
     return excluded_tables, skip_routines
 
 def create_new_backup(ssh: SSHClient, db_config: Dict[str, str]) -> Optional[str]:
-    """Create a new database backup."""
+    """Create new database backup.
+    
+    Creates a new backup on remote server using mysqldump.
+
+    Args:
+        ssh: SSH client connection
+        db_config: Database configuration dictionary
+        
+    Returns:
+        Optional[str]: Path to created backup file or None if backup failed
+        
+    Raises:
+        BackupError: If backup creation fails
+    """
     print(f"\n{BOLD}Creating new backup...{NC}")
 
     # Get MySQL info and version using the consolidated function
@@ -232,20 +270,30 @@ def create_new_backup(ssh: SSHClient, db_config: Dict[str, str]) -> Optional[str
         return None
 
 def get_file_extension(filename: str) -> str:
-    """Get the file extension(s) of a file."""
+    """Get file extension(s).
+    
+    Extracts extension from filename, handling compound extensions like .sql.gz
+
+    Args:
+        filename: Name of file
+        
+    Returns:
+        str: File extension(s)
+    """
     if filename.endswith('.sql.gz'):
         return 'sql.gz'
     return filename.split('.')[-1] if '.' in filename else ''
 
 def extract_backup(local_path: str) -> str:
-    """
-    Extract backup based on file extension and content.
+    """Extract compressed backup file.
     
+    Extracts .sql.gz backup files to .sql
+
     Args:
-        local_path: Path to the backup file
+        local_path: Path to compressed backup
         
     Returns:
-        Path to the extracted file
+        str: Path to extracted SQL file
         
     Raises:
         BackupError: If extraction fails
@@ -273,16 +321,17 @@ def extract_backup(local_path: str) -> str:
         raise BackupError("extraction", str(e)) from e
 
 def download_file(ssh: SSHClient, remote_path: str, progress) -> Optional[str]:
-    """
-    Download and prepare file for restoration.
+    """Download and prepare file for restoration.
     
+    Downloads backup file from remote server.
+
     Args:
         ssh: SSH client connection
-        remote_path: Path to the file on remote server
+        remote_path: Path to remote backup file
         progress: Progress indicator object
         
     Returns:
-        Path to the downloaded file or None if download fails
+        Optional[str]: Path to downloaded file or None if download fails
     """
     local_path = os.path.basename(remote_path)
     
