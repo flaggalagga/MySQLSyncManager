@@ -42,10 +42,12 @@ RUN pyinstaller \
     --paths /app \
     launcher.py
 
-# Copy config file to dist
-RUN cp mysql_sync_manager/db_configs.template.yml dist/db_configs.yml && \
-    cd dist && \
-    sed -i 's/\r$//' db_configs.yml && \
-    echo "" >> db_configs.yml
+# Ensure dist directory exists and copy the template config
+RUN mkdir -p dist && \
+    cp mysql_sync_manager/db_configs.template.yml dist/db_configs.yml && \
+    # Remove any potential Windows-style line endings
+    sed -i 's/\r$//' dist/db_configs.yml && \
+    # Ensure the file ends with a newline
+    echo "" >> dist/db_configs.yml
 
-CMD ["pyinstaller", "--clean", "mysql-sync-manager.spec"]
+CMD ["bash", "-c", "ls -l dist && cat dist/db_configs.yml"]
