@@ -42,8 +42,9 @@ RUN pyinstaller \
     --paths /app \
     launcher.py
 
-# Fix config file line endings
-RUN cd dist && \
+# Copy config file to dist
+RUN cp mysql_sync_manager/db_configs.yml dist/ && \
+    cd dist && \
     sed -i 's/\r$//' db_configs.yml && \
     echo "" >> db_configs.yml
 
