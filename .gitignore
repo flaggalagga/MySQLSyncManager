@@ -32,3 +32,4 @@ env/
 *.egg-info/
 dist/
 build/
+mysql_sync_manager/db_configs.yml

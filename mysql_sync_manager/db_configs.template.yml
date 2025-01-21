@@ -1,0 +1,18 @@
+configurations:
+  example:
+    name: "Example Configuration"
+    config:
+      MYSQL_EXPORT_HOST: "remote.host"
+      MYSQL_EXPORT_PORT: "3306"
+      MYSQL_EXPORT_DATABASE: "database_name"
+      MYSQL_EXPORT_USER: "export_user"
+      MYSQL_EXPORT_PASSWORD: "export_password"
+      MYSQL_EXPORT_BACKUP_DIR: "/path/to/backup/dir"
+      MYSQL_IMPORT_HOST: "localhost"
+      MYSQL_IMPORT_PORT: "3306"
+      MYSQL_IMPORT_DATABASE: "local_database"
+      MYSQL_IMPORT_USER: "import_user"
+      MYSQL_IMPORT_PASSWORD: "import_password"
+      SSH_HOST: "remote.host"
+      SSH_USER: "ssh_user"
+      SSH_KEY_PATH: "/path/to/ssh/key"

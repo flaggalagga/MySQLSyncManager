@@ -43,7 +43,7 @@ RUN pyinstaller \
     launcher.py
 
 # Copy config file to dist
-RUN cp mysql_sync_manager/db_configs.yml dist/ && \
+RUN cp mysql_sync_manager/db_configs.template.yml dist/db_configs.yml && \
     cd dist && \
     sed -i 's/\r$//' db_configs.yml && \
     echo "" >> db_configs.yml
