@@ -26,6 +26,7 @@ RUN echo '#!/usr/bin/env python3' > launcher.py && \
 RUN pyinstaller \
     --name mysql-sync-manager \
     --onefile \
+    --distpath /app/dist \
     --hidden-import mysql_sync_manager \
     --hidden-import mysql_sync_manager.config \
     --hidden-import mysql_sync_manager.backup_operations \
@@ -43,12 +44,7 @@ RUN pyinstaller \
     launcher.py
 
 # Prepare distribution files
-RUN mkdir -p /app/dist && \
-    # List contents of the dist directory created by PyInstaller
-    echo "PyInstaller dist contents:" && \
-    ls -la dist && \
-    # Create a precise copy of the executable to /app/dist
-    cp dist/mysql-sync-manager /app/dist/mysql-sync-manager && \
+RUN \
     # Copy the template config
     cp mysql_sync_manager/db_configs.template.yml /app/dist/db_configs.yml && \
     # Verify the files
