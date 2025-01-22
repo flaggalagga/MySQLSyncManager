@@ -20,29 +20,52 @@ jobs:
           docker compose -f docker-compose.build.yml build
           docker compose -f docker-compose.build.yml up
 
-      - name: Debug - List dist directory contents
+      - name: Debug - List project contents
         run: |
-          ls -la dist/
-          pwd
+          echo "Current directory contents:"
+          ls -la
+          echo "\nDocker images:"
+          docker images
+          echo "\nTrying to run container to extract files:"
+          docker create --name extract_container mysql-sync-manager-build
+          docker cp extract_container:/app/dist ./extracted_dist
+          ls -la extracted_dist || true
+          echo "\nSystem disk space:"
+          df -h
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: Release ${{ github.ref_name }}
-          files: |
-            dist/mysql-sync-manager
-            dist/db_configs.yml
-          generate_release_notes: true
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./extracted_dist/mysql-sync-manager
+          asset_name: mysql-sync-manager
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Config
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./extracted_dist/db_configs.yml
+          asset_name: db_configs.yml
+          asset_content_type: text/plain
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: mysql-sync-manager-${{ github.ref_name }}
-          path: |
-            dist/mysql-sync-manager
-            dist/db_configs.yml
+          path: ./extracted_dist/*
           retention-days: 5

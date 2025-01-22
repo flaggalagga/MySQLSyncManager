@@ -42,12 +42,10 @@ RUN pyinstaller \
     --paths /app \
     launcher.py
 
-# Ensure dist directory exists and copy the template config
-RUN mkdir -p dist && \
-    cp mysql_sync_manager/db_configs.template.yml dist/db_configs.yml && \
-    # Remove any potential Windows-style line endings
-    sed -i 's/\r$//' dist/db_configs.yml && \
-    # Ensure the file ends with a newline
-    echo "" >> dist/db_configs.yml
+# Modify the last part of the Dockerfile.build
+RUN mkdir -p /app/dist && \
+    cp dist/mysql-sync-manager /app/dist/ && \
+    cp dist/db_configs.yml /app/dist/ && \
+    ls -la /app/dist
 
 CMD ["bash", "-c", "ls -l dist && cat dist/db_configs.yml"]
