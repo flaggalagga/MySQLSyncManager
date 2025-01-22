@@ -26,9 +26,13 @@ jobs:
           ls -la
           echo "\nDocker images:"
           docker images
-          echo "\nTrying to run container to extract files:"
-          docker create --name extract_container mysql-sync-manager-build
-          docker cp extract_container:/app/dist ./extracted_dist
+          echo "\nTrying to extract files from built image:"
+          IMAGE_NAME=$(docker images -q mysqlsyncmanager-build)
+          if [ -n "$IMAGE_NAME" ]; then
+            CONTAINER_NAME=$(docker create $IMAGE_NAME)
+            docker cp $CONTAINER_NAME:/app/dist ./extracted_dist
+            docker rm $CONTAINER_NAME
+          fi
           ls -la extracted_dist || true
           echo "\nSystem disk space:"
           df -h

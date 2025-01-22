@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   build:
+    image: mysqlsyncmanager-build
     build:
       context: .
       dockerfile: Dockerfile.build
