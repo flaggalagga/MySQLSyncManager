@@ -2,6 +2,6 @@ cryptography>=44.0.0
 paramiko>=3.5.0
 PyYAML>=6.0.2
 scp>=0.15.0
-pytest
-pytest-cov
-pytest-timeout
+pytest>=7.3.1
+pytest-cov>=4.0.0
+pytest-timeout>=2.1.0
