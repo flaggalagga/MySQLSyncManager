@@ -15,28 +15,19 @@ A comprehensive Python tool for managing MySQL database backups and synchronizat
 - Remote server backup creation
 - Local database restoration
 
-## Build
+## Quick Start
 
 ### Prerequisites
 - Docker
 - Docker Compose
+- Python 3.8+
 
-### Building the Application
-```bash
-# Build the executable
-docker-compose -f docker-compose.build.yml up --build
-```
+### Installation
+1. Download the latest release from the [Releases page](../../releases)
+2. Place the executable in your desired location
+3. Create a `db_configs.yml` file with your database configurations
 
-This will create an executable in the `dist` directory along with a configuration file.
-
-### Running Tests
-```bash
-# Run test suite
-docker-compose -f docker-compose.test.yml up --build
-```
-
-## Configuration
-
+### Configuration File
 Create a `db_configs.yml` file with your database configurations:
 
 ```yaml
@@ -59,6 +50,18 @@ configurations:
       SSH_USER: "ssh_user"
       SSH_KEY_PATH: "/path/to/ssh/key"
 ```
+
+## Usage
+
+1. Make the executable runnable:
+   ```bash
+   chmod +x mysql-sync-manager
+   ```
+
+2. Run the application:
+   ```bash
+   ./mysql-sync-manager
+   ```
 
 ## Key Features
 
@@ -86,38 +89,22 @@ configurations:
 - Displays database size
 - Disk usage warnings
 
-## Prerequisites
-
-### System Requirements
-- Docker installed
-- Linux environment (for running the executable)
-- SSH access to remote server
-- MySQL client installed on the system running the executable
-
-### Docker Requirements
-- Docker version 20.10 or higher
-- Docker Compose version 2.0 or higher
-
-## Project Structure
-```
-mysql_sync_manager/
-├── main.py               # Application entry point
-├── config.py            # Configuration handling
-├── ssh.py               # SSH operations
-├── db.py                # Database operations
-├── backup_operations.py # Backup file handling
-└── menu.py              # User interaction menu
-```
-
 ## Development
 
-### Building for Development
-```bash
-# Build the application
-docker-compose -f docker-compose.build.yml up --build
+### Prerequisites
+- Docker
+- Docker Compose
 
-# Run tests
-docker-compose -f docker-compose.test.yml up --build
+### Building the Application
+```bash
+# Build the executable
+docker compose -f docker-compose.build.yml up --build
+```
+
+### Running Tests
+```bash
+# Run test suite
+docker compose -f docker-compose.test.yml up --build
 ```
 
 ## Security Considerations
@@ -132,6 +119,9 @@ docker-compose -f docker-compose.test.yml up --build
 3. Commit your changes
 4. Push to the branch
 5. Create a Pull Request
+
+## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Disclaimer
 This tool is provided as-is. Always ensure you have proper backups before database operations.
