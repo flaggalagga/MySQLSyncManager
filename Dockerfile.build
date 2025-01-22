@@ -42,10 +42,18 @@ RUN pyinstaller \
     --paths /app \
     launcher.py
 
-# Modify the last part of the Dockerfile.build
+# Prepare distribution files
 RUN mkdir -p /app/dist && \
-    cp dist/mysql-sync-manager /app/dist/ && \
-    cp dist/db_configs.yml /app/dist/ && \
+    # List contents of the dist directory created by PyInstaller
+    echo "PyInstaller dist contents:" && \
+    ls -la dist && \
+    # Create a precise copy of the executable to /app/dist
+    cp dist/mysql-sync-manager /app/dist/mysql-sync-manager && \
+    # Copy the template config
+    cp mysql_sync_manager/db_configs.template.yml /app/dist/db_configs.yml && \
+    # Verify the files
+    echo "Final /app/dist contents:" && \
     ls -la /app/dist
 
-CMD ["bash", "-c", "ls -l dist && cat dist/db_configs.yml"]
+# Optional: set the default command to just list the dist contents
+CMD ["bash", "-c", "ls -la /app/dist"]
