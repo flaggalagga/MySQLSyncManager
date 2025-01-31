@@ -1,0 +1,34 @@
+FROM ubuntu:22.04
+
+WORKDIR /app
+
+# Install mysql client and openssh for key management
+RUN apt-get update && \
+    apt-get install -y \
+    default-mysql-client \
+    openssh-client && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create SSH directory with correct permissions
+RUN mkdir -p /var/www/html/.ssh && \
+    chmod 700 /var/www/html/.ssh
+
+# Copy just the executable and config
+COPY dist/mysql-sync-manager /app/
+COPY dist/db_configs.yml /app/
+
+# Make it executable
+RUN chmod +x /app/mysql-sync-manager
+
+# Create a script to check and fix permissions if needed
+RUN echo '#!/bin/bash' > /app/entrypoint.sh && \
+    echo 'if [ -d "/var/www/html/.ssh" ]; then' >> /app/entrypoint.sh && \
+    echo '  chmod 700 /var/www/html/.ssh' >> /app/entrypoint.sh && \
+    echo '  find /var/www/html/.ssh -type f -exec chmod 600 {} \;' >> /app/entrypoint.sh && \
+    echo '  echo "SSH directory permissions:"' >> /app/entrypoint.sh && \
+    echo '  ls -la /var/www/html/.ssh' >> /app/entrypoint.sh && \
+    echo 'fi' >> /app/entrypoint.sh && \
+    echo './mysql-sync-manager' >> /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]

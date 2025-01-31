@@ -14,7 +14,10 @@ services:
     user: root
     networks:
       - shop_network
+      - snosm-cakephp2_default
 
 networks:
   shop_network:
-    external: true   # Use existing network instead of creating new one
+    external: true
+  snosm-cakephp2_default:
+    external: true
